@@ -132,3 +132,7 @@ for task 3, i have added reactJS + axios
 * dashboard (manager)
     * visibility of inventory
     * visibility of students
+
+# ai used
+* free chatgpt
+* free gemini
