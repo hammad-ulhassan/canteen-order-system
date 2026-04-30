@@ -105,12 +105,12 @@ A react app with form
     * clone suspencted data to local and run the order placement. find the bug
     * investing in load testing the order placement. this will remove edge cases like race conditions
 *   **How would you prevent it in the future?**
-    *single DB transaction. to ensure atomic updates
-    *lock db row while udpateding
-    *keep logging and monitoring software integration. all incoming requests are logged (request ids). exceptions are shown monitoring systems.
-    *idempotency keys from frontend on order creation
-    *system alarms: number of orders placed should always be equal to wallet deductions (or changes) made. this should be monitored. if theres a problem in this, alarm is raised.
-    *testing: integration tests e2e testing can help reduce this issue before it arises. write tests for failure scenarios.
+    * single DB transaction. to ensure atomic updates
+    * lock db row while udpateding
+    * keep logging and monitoring software integration. all incoming requests are logged (request ids). exceptions are shown monitoring systems.
+    * idempotency keys from frontend on order creation
+    * system alarms: number of orders placed should always be equal to wallet deductions (or changes) made. this should be monitored. if theres a problem in this, alarm is raised.
+    * testing: integration tests e2e testing can help reduce this issue before it arises. write tests for failure scenarios.
 
 
 # task 3
