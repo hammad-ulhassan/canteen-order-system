@@ -7,4 +7,14 @@ const api = axios.create({
   },
 });
 
+export const getAllMenuItems = async () => {
+  const response = await api.get('/menu-item/all');
+  return response.data;
+};
+
+export const getAllStudents = async () => {
+  const response = await api.get('/student/all');
+  return response.data;
+};
+
 export default api;
