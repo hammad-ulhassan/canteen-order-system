@@ -109,6 +109,7 @@ A react app with form
     * lock db row while udpateding
     * keep logging and monitoring software integration. all incoming requests are logged (request ids). exceptions are shown monitoring systems.
     * idempotency keys from frontend on order creation
+    * can also make use of version column and order payment status columns
     * system alarms: number of orders placed should always be equal to wallet deductions (or changes) made. this should be monitored. if theres a problem in this, alarm is raised.
     * testing: integration tests e2e testing can help reduce this issue before it arises. write tests for failure scenarios.
 
