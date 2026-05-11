@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource } from 'typeorm';
+import { Repository, DataSource, TypeORMError } from 'typeorm';
 import { Order } from '../entities/order.entity';
 import { EntityNotFoundError } from 'src/common/errors/errors';
 import { MenuItem } from 'src/modules/menu-item/entities/menu-item.entity';
@@ -53,5 +53,20 @@ export class OrderRepository {
           throw new EntityNotFoundError('order.studentId', studentId);
         },
       );
+  }
+
+  async getAllOrders() {
+    return this.repository
+      .findAndCount({
+        relations: {
+          student: true,
+          items: {
+            menuItem: true,
+          },
+        },
+      })
+      .catch((err: TypeORMError) => {
+        throw new Error(err.message);
+      });
   }
 }

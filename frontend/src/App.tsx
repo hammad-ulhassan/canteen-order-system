@@ -4,10 +4,11 @@ import { Button } from '../@/components/ui/button';
 import { Popover, PopoverTrigger, PopoverContent } from '../@/components/ui/popover';
 import { Command, CommandInput, CommandEmpty, CommandGroup, CommandItem } from '../@/components/ui/command';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../@/components/ui/table';
 import { getAllMenuItems, getAllStudents } from './services/axios';
 import { Check, ChevronsUpDown, Plus, Minus, ShoppingCart } from "lucide-react";
 import { cn } from '../@/lib/utils';
-import { createOrder, CreateOrderDto, OrderItem } from './services/order.service';
+import { createOrder, CreateOrderDto, getAllOrders, OrderItem } from './services/order.service';
 
 function App() {
 
@@ -18,6 +19,7 @@ function App() {
   const [cart, setCart] = useState<{ [key: string]: number }>({});
   const [selectedStudent, setSelectedStudent] = useState("");
   const [open, setOpen] = useState(false);
+  const [orders, setOrders] = useState<any[]>([]);
 
   const menuLookup = useMemo(() => {
     return Object.fromEntries(menuItems.map(item => [item.id, item.price]));
@@ -30,15 +32,28 @@ function App() {
     }, 0);
   }, [cart, menuLookup]);
 
+  const fetchOrders = useCallback(async () => {
+    try {
+      const res = await getAllOrders();
+      if(res.statusCode === 200) {
+        setOrders(res.data[0] || []);
+      }else{
+        alert("Error fetching Orders");
+      }
+    } catch (err) {
+      console.error("Failed to fetch orders", err);
+    }
+  }, []);
+
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
-        // Fetch both datasets concurrently
         const [studentRes, menuRes] = await Promise.all([
           getAllStudents(),
           getAllMenuItems(),
         ]);
+        fetchOrders();
 
         console.log({studentRes, menuRes})
         setStudents(studentRes.data[0]); 
@@ -52,7 +67,7 @@ function App() {
     };
 
     loadData();
-  }, []);
+  }, [fetchOrders]);
 
   const handlePlaceOrder = useCallback(async () => {
     if (!selectedStudent) {
@@ -60,7 +75,6 @@ function App() {
       return;
     }
   
-    // Transform { [id]: qty } into [{ menuItemId: id, quantity: qty }]
     const orderItems: OrderItem[] = Object.entries(cart).map(([menuItemId, quantity]) => ({
       menuItemId,
       quantity,
@@ -82,6 +96,7 @@ function App() {
         setCart({});
         setSelectedStudent("");
         alert("Order placed successfully!");
+        await fetchOrders();
       } else {
         const { data: { message } } = result;
         alert(`Order Placement error: ${ message }`);
@@ -94,16 +109,11 @@ function App() {
     } finally {
       setLoading(false);
     }
-  }, [selectedStudent, cart]);
+  }, [selectedStudent, cart, fetchOrders]);
 
 
-  if (loading){
-    return <div>Loading Canteen...</div>;
-  }
-    
-  if (error) {
-    return <div style={{ color: 'red' }}>{error}</div>
-  };
+  if (loading) return <div className="flex h-screen items-center justify-center font-medium">Loading Canteen System...</div>;
+  if (error) return <div className="flex h-screen items-center justify-center text-destructive font-bold">{error}</div>;
 
   const updateQuantity = (id: string, delta: number) => {
     setCart(prev => {
@@ -178,6 +188,46 @@ function App() {
           </Card>
         ))}
       </div>
+
+      <aside className="space-y-4">
+            <h2 className="text-xl font-bold px-1">Order History</h2>
+            <Card className="h-full border-none shadow-md overflow-hidden">
+              <div className="max-h-[calc(100vh-220px)] overflow-y-auto">
+                <Table>
+                  <TableHeader className="bg-muted/50 sticky top-0 z-10">
+                    <TableRow>
+                      <TableHead className="w-[60%]">Customer</TableHead>
+                      <TableHead className="text-right">Total</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {orders.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={2} className="text-center py-20 text-muted-foreground italic">
+                          No recent transactions
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      orders.map((order) => (
+                        <TableRow key={order.id} className="hover:bg-muted/30">
+                          <TableCell className="py-3">
+                            <div className="font-semibold text-sm truncate w-[140px]">
+                              {order.student?.name || "Deleted Student"}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right align-top pt-3">
+                            <span className="font-mono font-bold text-green-600">
+                              ${Number(order.total || order.totalAmount).toFixed(2)}
+                            </span>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </Card>
+          </aside>
 
       {/* Place Order Bar */}
       {Object.keys(cart).length > 0 && (

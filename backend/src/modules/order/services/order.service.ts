@@ -69,4 +69,8 @@ export class OrderService {
     }
     throw new CannotCreateResourceError('Order');
   }
+
+  async getAllOrders() {
+    return await this.orderRepo.getAllOrders();
+  }
 }

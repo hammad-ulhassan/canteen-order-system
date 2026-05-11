@@ -14,3 +14,8 @@ export const createOrder = async (orderData: CreateOrderDto) => {
     const response = await api.post('/order', orderData);
     return response.data;
 };
+
+export const getAllOrders = async () => {
+  const response = await api.get('/order/all');
+  return response.data;
+};
